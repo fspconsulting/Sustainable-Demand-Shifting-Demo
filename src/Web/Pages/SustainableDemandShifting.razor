@@ -1,0 +1,89 @@
+﻿@page "/sds"
+@inject IEmissionsService EmissionsService
+@inject IWorkService WorkService
+
+<PageTitle>Demand Shifting</PageTitle>
+
+<h1>Demand Shifting</h1>
+
+<div class="row">
+  <div class="content">
+    <h2>Overview</h2>
+    <p>This demo was inspired by the <a href="https://github.com/Green-Software-Foundation/carbon-aware-sdk" target="_blank">Carbon Aware SDK</a> created by the <a href="https://greensoftware.foundation/" target="_blank">Green Software Foundation</a> and illustrates sustainable demand shifting. Sustainable demand shifting means moving your workload to another physical location - known as spatial shifting - or running your workload at a different time - known as temporal shifting. The objective of sustainable demand shifting is to run your workload where/when the carbon intensity is at its lowest in order to minimise the amount of carbon emitted per unit of work.</p>
+    <p>In this demo, we showcase two spatial shifting strategies:</p>
+    <ul>
+      <li><strong>User-led:</strong> This strategy lets the user decide where they want to run the workload.</li>
+      <li><strong>App-led:</strong> This strategy lets the app decide where to run the workload.</li>
+    </ul>
+    <p>In both strategies, the workload is executed in a specific region of Azure. In this demo, the work can be executed in either UK South (Great Britain) or North Europe (Ireland).</p>
+    <p>The default mode is Auto, i.e. the app will decide the most efficient region to execute the work by comparing the the carbon intensity of the two regions and selecting the one the lowest emissions. However, the user can override this and make a concious decision as to where to which region to run the work.</p>
+    <p>Emissions data is provided by <a href="https://app.electricitymaps.com/" target="_blank">Electricity Maps</a> via the Carbon Aware SDK.</p>
+  </div>
+
+  <div class="content">
+    <h2>Demo</h2>
+    <p>First, select the location you want to run work in or leave it on Auto let the app decide the most efficent place to run the workload. Note that the emission values shown next to the selectors are evaluated each time the page loads.</p>
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+      <label class="btn btn-secondary">
+        <input type="radio" name="locations" autocomplete="off" value="@(Constants.GB)" @onchange="OnSelectedLocationChanged" checked="@(selectedLocation == Constants.GB)"> UK South (@(uksEmissionsData == null ? "Loading...": uksEmissionsData?.RatingFomatted)) 
+      </label>
+      <label class="btn btn-outline-success active">
+        <input type="radio" name="locations" autocomplete="off" value="@(Constants.ECO)" @onchange="OnSelectedLocationChanged" checked="@(selectedLocation == Constants.ECO)"> Auto
+      </label>
+      <label class="btn btn-secondary">
+        <input type="radio" name="locations" autocomplete="off" value="@(Constants.IE)" @onchange="OnSelectedLocationChanged" checked="@(selectedLocation == Constants.IE)"> North Europe (@(neuEmissionsData == null ? "Loading...": neuEmissionsData?.RatingFomatted))
+      </label>
+    </div>
+  </div>
+
+  <div class="content">
+    <p>Next, click the <strong>Do Work</strong> button to make a request to run some work in the selected location.</p>
+    <button class="btn btn-primary" @onclick="DoWork">Do Work</button>
+    <label>@message</label>
+  </div>
+</div>
+
+<div class="row">
+  <div class="content">
+    <h2>Architecture</h2>
+    <p>The diagrams below illustrate the architecture of the demo using <a href="https://structurizr.com/" target="_blank">Structurizr</a>.</p>
+  </div>
+  <div class="content">
+    <p>System Context:</p>
+    <img src="images/systemDiagram1.png" alt="System Context" class="responsive" />
+    <p>Container:</p>
+    <img src="images/systemDiagram2.png" alt="Container" class="responsive"/>
+    <p>Component:</p>
+    <img src="images/systemDiagram3.png" alt="Component" class="responsive"/>
+  </div>
+</div>
+
+@code {
+    private EmissionsData? uksEmissionsData;
+    private EmissionsData? neuEmissionsData;
+    private string? message;
+    private string selectedLocation = Constants.ECO;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var emissionsData = await EmissionsService.GetEmissionsDataAsync();
+        
+        uksEmissionsData = emissionsData.FirstOrDefault(
+          d => d.Location.Equals(Constants.GB, StringComparison.OrdinalIgnoreCase));
+
+        neuEmissionsData = emissionsData.FirstOrDefault(
+          d => d.Location.Equals(Constants.IE, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void OnSelectedLocationChanged(ChangeEventArgs args)
+    {
+        selectedLocation = args.Value.ToString();
+    }
+
+    private async Task DoWork()
+    {
+        message = "Working on it...";
+        var workData = await WorkService.DoWorkAsync(selectedLocation);
+        message = $"Work completed in {workData.Region} in {workData.Duration.TotalSeconds} seconds.";
+    }
+}
