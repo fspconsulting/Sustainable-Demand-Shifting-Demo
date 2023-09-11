@@ -5,7 +5,7 @@ and illustrates sustainable demand shifting.
 
 ## Introduction
 ---
-Sustainability is about meeting the needs of the present – without compromising the ability of future generations to meet their needs. Organisations have a responsibility to transform the way they use digital technology to be more sustainable. As software engineers, we have a responsibility to ensure minimise the carbon footprint of the software we write and not treat resources like CPU and storage as an infinite commodity.
+Sustainability is about meeting the needs of the present – without compromising the ability of future generations to meet their needs. Organisations have a responsibility to transform the way they use digital technology to be more sustainable. As software engineers, we have a responsibility to ensure we minimise the carbon footprint of the software we write and not treat resources like CPU and storage as an infinite commodity.
 
 Sustainable Demand Shifting is a pattern for enabling applications to run where and when the carbon intensity is at its lowest.
 
